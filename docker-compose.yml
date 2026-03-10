@@ -1,0 +1,96 @@
+version: '3.6'
+
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: ${MYSQL_CONTAINER_NAME:-tile_api_mysql}
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-symfony}
+      MYSQL_USER: ${MYSQL_USER:-symfony}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-symfony}
+#    volumes: #TODO !
+#      # Локальная папка для данных (легко бэкапить и смотреть)
+#      - ./docker/mysql/data:/var/lib/mysql
+#      # Конфиги
+#      - ./docker/mysql/conf.d:/etc/mysql/conf.d:ro
+#      # Init-скрипты
+#      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+#      # Временные файлы
+#      - ./docker/mysql/tmp:/tmp/mysql
+#    command:
+#      - "--character-set-server=utf8mb4"
+#      - "--collation-server=utf8mb4_unicode_ci"
+    networks:
+      - tile_api
+
+  manticore:
+    image: manticoresearch/manticore:latest
+    container_name: ${MANTICORE_CONTAINER_NAME:-tile_api_manticore}
+    restart: unless-stopped
+    volumes:
+      - ./docker/manticore/manticore.conf:/etc/manticoresearch/manticore.conf
+      - manticore_data:/var/lib/manticore
+    networks:
+      - tile_api
+
+  php:
+    build:
+      context: ./docker/php
+      args:
+        USER_ID: ${USER_ID:-33}
+        GROUP_ID: ${GROUP_ID:-33}
+    entrypoint: ./docker/php/setup.sh
+    container_name: ${PHP_CONTAINER_NAME:-tile_api_php}
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_CONTAINER_NAME:-tile_api_mysql}:3306/${MYSQL_DATABASE}?serverVersion=5.7
+      MANTICORE_URL: mysql://root:@manticore:9306
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/setup.sh:/var/www/html/setup.sh:cached
+#    working_dir: /var/www/html
+    networks:
+      - tile_api
+    depends_on:
+      - mysql
+      - manticore
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: ${NGINX_CONTAINER_NAME:-tile_api_nginx}
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - tile_api
+    depends_on:
+      - php
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: ${PHPMYADMIN_CONTAINER_NAME:-tile_api_phpmyadmin}
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    networks:
+      - tile_api
+    depends_on:
+      - mysql
+
+networks:
+  tile_api:
+    driver: bridge
+
+volumes:
+  manticore_data:
+

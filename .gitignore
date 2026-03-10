@@ -69,9 +69,12 @@ TASK.md
 ###< friendsofphp/php-cs-fixer ###
 
 ###> symfony/phpunit-bridge ###
-.phpunit.result.cache
+###> phpunit/phpunit ###
 /phpunit.xml
+/.phpunit.cache/
+.phpunit.result.cache
 /.php_cs
+###< phpunit/phpunit ###
 ###< symfony/phpunit-bridge ###
 
 ###> symfony/lock ###
