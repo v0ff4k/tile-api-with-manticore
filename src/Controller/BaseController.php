@@ -13,8 +13,4 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class BaseController extends AbstractController
 {
 
-    public static function getSubscribedServices()
-    {
-        // TODO: Implement getSubscribedServices() method.
-    }
 }
