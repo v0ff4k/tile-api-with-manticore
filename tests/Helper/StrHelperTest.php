@@ -1,12 +1,15 @@
 <?php
 
+namespace App\Tests\Helper;
+
 use Helper\StrHelper;
+use \PHPUnit\Framework\TestCase;
 
 /**
  * Class StrHelperTest
  * @todo
  */
-class StrHelperTest extends \PHPUnit\Framework\TestCase
+class StrHelperTest extends TestCase
 {
     public function getStringBetweenDataProvider()
     {
