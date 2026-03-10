@@ -5,6 +5,7 @@ namespace Controller;
 use Repository\OrderRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -34,5 +35,21 @@ class OrderController extends BaseController
         $result = $repository->getGroupedOrders($page, $limit, $groupBy);
 
         return $this->json($result);
+    }
+
+    /**
+     * @param int $id
+     * @param OrderRepository $repository
+     * @return JsonResponse
+     */
+    #[Route('/api/orders/{id}', name: 'api_order_show', methods: ['GET'])]
+    public function show(int $id, OrderRepository $repository): JsonResponse
+    {
+        $order = $repository->find($id);
+        if (!$order) {
+            return $this->json(['error' => 'Order not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($order, Response::HTTP_OK, [], ['groups' => 'order:read']);
     }
 }

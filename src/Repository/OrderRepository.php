@@ -3,12 +3,13 @@
 namespace Repository;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Class OrderRepository
  * @package Repository
  */
-class OrderRepository
+class OrderRepository extends EntityRepository
 {
     private Connection $connection;
 
