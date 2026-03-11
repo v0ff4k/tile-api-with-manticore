@@ -13,4 +13,3 @@ class OrderArticleRepository extends ServiceEntityRepository
         parent::__construct($registry, OrderArticle::class);
     }
 }
-

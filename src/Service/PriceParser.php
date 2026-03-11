@@ -1,42 +1,58 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
-use RuntimeException;
+use App\Dto\TileExpert\TileExpertData;
 use App\Helper\StrHelper;
 use App\Helper\TileExpertHelper;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Class PriceParser
- * @package Service
+ * Парсер цен с сайта TileExpert.
  */
 class PriceParser
 {
-    private string $dataDir;
-    private HttpClientInterface $http;
-
-    public function __construct(HttpClientInterface $http, string $dataDir = 'https://tile.expert/it/tile')
-    {
-        $this->http = $http;
-        $this->dataDir = $dataDir;
+    public function __construct(
+        private readonly HttpClientInterface $http,
+        private readonly string $dataDir = 'https://tile.expert/it/tile',
+    ) {
     }
 
     /**
-     * @param string $factory
-     * @param string $collection
-     * @param string $article
-     * @throws RuntimeException
-     * @return float
+     * Получить цену товара.
+     *
+     * @throws \RuntimeException
      */
     public function parse(string $factory, string $collection, string $article): float
     {
-        $url = sprintf('%s/%s/%s/a/%s', $this->dataDir, $factory, $collection, $article);
+        $url  = $this->buildUrl($factory, $collection, $article);
+        $html = $this->fetchHtml($url);
+        $data = $this->extractData($html);
 
+        return $data->getPrice();
+    }
+
+    /**
+     * Построить URL для запроса.
+     */
+    private function buildUrl(string $factory, string $collection, string $article): string
+    {
+        return sprintf('%s/%s/%s/a/%s', $this->dataDir, $factory, $collection, $article);
+    }
+
+    /**
+     * Получить HTML страницы.
+     *
+     * @throws \RuntimeException
+     */
+    private function fetchHtml(string $url): string
+    {
         try {
             $response = $this->http->request('GET', $url, [
                 'headers' => [
@@ -46,28 +62,22 @@ class PriceParser
                 'timeout' => 15,
                 'max_redirects' => 5,
             ]);
-            if ($response->getStatusCode() !== 200) {
-                throw new RuntimeException('Failed to fetch page');
+
+            if (200 !== $response->getStatusCode()) {
+                throw new \RuntimeException('Failed to fetch page: HTTP '.$response->getStatusCode());
             }
-            $html = $response->getContent();
+
+            return $response->getContent();
         } catch (TransportExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
-            throw new RuntimeException('Failed to fetch page');
+            throw new \RuntimeException('Failed to fetch page: '.$e->getMessage(), 0, $e);
         }
+    }
 
-        $data = TileExpertHelper::extractAppStoreJson($html);
-        if (!isset($data['slider']['elements'])) {
-            throw new RuntimeException('Invalid JSON structure');
-        }
-
-        // Поиск артикула по имени? Поскольку у нас только один элемент, возьмём первый.
-        // В реальном проекте нужно идентифицировать артикул по параметрам.
-        foreach ($data['slider']['elements'] as $element) {
-            // Здесь можно сопоставить по артикулу, но в файле один элемент
-            if (isset($element['priceEuroIt'])) {
-                return (float) $element['priceEuroIt'];
-            }
-        }
-
-        throw new RuntimeException('Price not found');
+    /**
+     * Извлечь данные из HTML.
+     */
+    private function extractData(string $html): TileExpertData
+    {
+        return TileExpertHelper::extractAppStoreJson($html);
     }
 }

@@ -101,3 +101,7 @@ yarn-error.log
 # OS files (mac an win)
 .DS_Store
 Thumbs.db
+
+###> phpstan/phpstan ###
+phpstan.neon
+###< phpstan/phpstan ###

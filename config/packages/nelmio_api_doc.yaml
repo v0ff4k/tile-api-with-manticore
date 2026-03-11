@@ -1,0 +1,34 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: 'Tile API with Manticore'
+            description: 'API для работы с заказами, ценами и поиском через Manticore'
+            version: '1.0.0'
+        contact:
+            name: 'Support'
+            email: 'support@example.com'
+        tags:
+            - name: 'Orders'
+              description: 'Управление заказами'
+            - name: 'Price'
+              description: 'Получение цен товаров'
+            - name: 'Search'
+              description: 'Поиск через Manticore'
+            - name: 'SOAP'
+              description: 'SOAP-сервер'
+    areas:
+        # Default area для Swagger UI
+        default:
+            path_patterns:
+                - ^/api(?!/docs$)
+        # Area для JSON спецификации
+        json:
+            path_patterns:
+                - ^/api(?!/docs$)
+
+# Dev окружение
+when@dev:
+    nelmio_api_doc:
+        documentation:
+            info:
+                title: 'Tile API with Manticore (Dev)'

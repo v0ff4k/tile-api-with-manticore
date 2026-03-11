@@ -31,3 +31,13 @@ services:
     App\Service\ManticoreSearchService:
         arguments:
             $manticoreConnection: '@doctrine.dbal.manticore_connection'
+
+    # ValueResolvers для маппинга Request в DTO
+    App\Controller\Resolver\SearchRequestValueResolver:
+        tags: ['controller.targeted_value_resolver']
+
+    App\Controller\Resolver\GroupedOrdersRequestValueResolver:
+        tags: ['controller.targeted_value_resolver']
+
+    App\Controller\Resolver\PriceRequestValueResolver:
+        tags: ['controller.targeted_value_resolver']

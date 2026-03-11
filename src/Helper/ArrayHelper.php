@@ -2,8 +2,18 @@
 
 namespace App\Helper;
 
+/**
+ * Class ArrayHelper
+ * @package App\Helper
+ */
 final class ArrayHelper
 {
+    /**
+     * @param array $data
+     * @param string $key
+     * @param string|null $default
+     * @return string|null
+     */
     public static function getString(array $data, string $key, ?string $default = null): ?string
     {
         if (!array_key_exists($key, $data) || $data[$key] === null) {
@@ -21,6 +31,12 @@ final class ArrayHelper
         return $default;
     }
 
+    /**
+     * @param array $data
+     * @param string $key
+     * @param int|null $default
+     * @return int|null
+     */
     public static function getInt(array $data, string $key, ?int $default = null): ?int
     {
         if (!array_key_exists($key, $data) || $data[$key] === null) {
@@ -38,6 +54,12 @@ final class ArrayHelper
         return $default;
     }
 
+    /**
+     * @param array $data
+     * @param string $key
+     * @param float|null $default
+     * @return float|null
+     */
     public static function getFloat(array $data, string $key, ?float $default = null): ?float
     {
         if (!array_key_exists($key, $data) || $data[$key] === null) {
@@ -59,7 +81,10 @@ final class ArrayHelper
     }
 
     /**
-     * @return array<mixed>
+     * @param array $data
+     * @param string $key
+     * @param array $default
+     * @return array
      */
     public static function getArray(array $data, string $key, array $default = []): array
     {
@@ -70,4 +95,3 @@ final class ArrayHelper
         return is_array($data[$key]) ? $data[$key] : $default;
     }
 }
-

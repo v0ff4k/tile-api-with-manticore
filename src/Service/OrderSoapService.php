@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use App\Entity\Order;
@@ -8,34 +10,33 @@ use App\Helper\ArrayHelper;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Class OrderSoapService
- * @package Service
+ * Сервис для обработки SOAP-запросов и создания заказов.
+ * OrderSoapService регистрируется как SOAP-сервер через SoapController. Все публичные методы класса автоматически становятся доступными SOAP-методами:
  */
 class OrderSoapService
 {
-    private EntityManagerInterface $em;
-
-    public function __construct(EntityManagerInterface $em)
-    {
-        $this->em = $em;
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+    ) {
     }
 
     /**
-     * @param array $orderData
-     * @return int
+     * Создать заказ из SOAP-запроса.
+     *
+     * @param array<string, mixed>|object $orderData Данные заказа
+     *
+     * @return int ID созданного заказа
      */
-    public function createOrder($orderData): int
+    public function createOrder(array|object $orderData): int
     {
-        if (!is_array($orderData)) {
-            throw new \InvalidArgumentException('orderData must be an array');
-        }
+        $orderData = (array) $orderData;
 
         $order = new Order();
 
-        $hash = ArrayHelper::getString($orderData, 'hash') ?? bin2hex(random_bytes(16));
-        $token = ArrayHelper::getString($orderData, 'token') ?? bin2hex(random_bytes(32));
+        $hash   = ArrayHelper::getString($orderData, 'hash') ?? bin2hex(random_bytes(16));
+        $token  = ArrayHelper::getString($orderData, 'token') ?? bin2hex(random_bytes(32));
         $locale = ArrayHelper::getString($orderData, 'locale', 'en') ?? 'en';
-        $name = ArrayHelper::getString($orderData, 'name', 'order') ?? 'order';
+        $name   = ArrayHelper::getString($orderData, 'name', 'order') ?? 'order';
 
         $order->setHash($hash);
         $order->setToken($token);
@@ -43,7 +44,7 @@ class OrderSoapService
         $order->setName($name);
 
         $email = ArrayHelper::getString($orderData, 'email');
-        if ($email !== null) {
+        if (null !== $email) {
             $order->setEmail($email);
         }
 

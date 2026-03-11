@@ -33,4 +33,3 @@ XML;
         $this->assertStringContainsString('text/xml', (string) $client->getResponse()->headers->get('Content-Type'));
     }
 }
-

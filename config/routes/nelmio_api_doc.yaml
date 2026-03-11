@@ -1,0 +1,18 @@
+# NelmioApiDocBundle routes
+# JSON спецификация OpenAPI
+
+app.swagger:
+    path: /api/doc.json
+    methods: GET
+    defaults:
+        _controller: nelmio_api_doc.controller.swagger_json
+        _format: json
+        area: json
+
+# Редирект с /api/docs на статический Swagger UI
+app.swagger_ui_redirect:
+    path: /api/docs
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /api/docs.html
+        permanent: false

@@ -28,10 +28,10 @@ class ManticoreSearchService
     {
         $offset = ($page - 1) * $limit;
 
-        $sql = "SELECT *, weight() as relevance 
+        $sql = 'SELECT *, weight() as relevance 
                 FROM orders_idx 
                 WHERE MATCH(:query) 
-                LIMIT :limit OFFSET :option";
+                LIMIT :limit OFFSET :option';
 
         $stmt = $this->manticoreConnection->prepare($sql);
         $stmt->bindValue('query', $query);
@@ -40,7 +40,7 @@ class ManticoreSearchService
         $rows = $stmt->executeQuery()->fetchAllAssociative();
 
         // Получаем общее количество
-        $countSql = "SELECT COUNT(*) FROM orders_idx WHERE MATCH(:query)";
+        $countSql  = 'SELECT COUNT(*) FROM orders_idx WHERE MATCH(:query)';
         $countStmt = $this->manticoreConnection->prepare($countSql);
         $countStmt->bindValue('query', $query);
         $total = $countStmt->executeQuery()->fetchOne();

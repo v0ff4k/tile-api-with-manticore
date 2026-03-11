@@ -10,8 +10,10 @@ class ManticoreControllerTest extends WebTestCase
     public function testSearchReturnsJson(): void
     {
         static::bootKernel();
-        static::getContainer()->set(ManticoreSearchService::class, new class extends ManticoreSearchService {
-            public function __construct() {}
+        static::getContainer()->set(ManticoreSearchService::class, new class () extends ManticoreSearchService {
+            public function __construct()
+            {
+            }
             public function searchOrders(string $query, int $page, int $limit): array
             {
                 return [
@@ -30,4 +32,3 @@ class ManticoreControllerTest extends WebTestCase
         $this->assertJson($client->getResponse()->getContent() ?: '');
     }
 }
-

@@ -20,7 +20,7 @@ class OrderFixtures extends Fixture
             $order = new Order();
             $order->setHash(md5(uniqid()));
             $order->setToken(md5(uniqid()));
-            $order->setNumber('ORD-' . str_pad((string)$i, 5, '0', STR_PAD_LEFT));
+            $order->setNumber('ORD-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
             $order->setStatus(1);
             $order->setEmail("customer{$i}@example.com");
             $order->setClientName("Client {$i}");
@@ -30,7 +30,7 @@ class OrderFixtures extends Fixture
             $order->setPayType(1);
             $order->setDelivery(15.50);
             $order->setDeliveryCity("City {$i}");
-            $order->setCreateDate(new \DateTime("2026-0" . rand(1, 3) . "-" . rand(1, 28) . " 10:00:00"));
+            $order->setCreateDate(new \DateTime('2026-0' . rand(1, 3) . '-' . rand(1, 28) . ' 10:00:00'));
 
             $manager->persist($order);
             $manager->flush(); // нужно получить ID

@@ -10,8 +10,10 @@ class OrderControllerTest extends WebTestCase
     public function testGroupedDefaultsAndReturnsJson(): void
     {
         static::bootKernel();
-        static::getContainer()->set(OrderRepository::class, new class extends OrderRepository {
-            public function __construct() {}
+        static::getContainer()->set(OrderRepository::class, new class () extends OrderRepository {
+            public function __construct()
+            {
+            }
             public function getGroupedOrders(int $page, int $limit, string $groupBy): array
             {
                 return [
@@ -38,8 +40,10 @@ class OrderControllerTest extends WebTestCase
     public function testShowNotFound(): void
     {
         static::bootKernel();
-        static::getContainer()->set(OrderRepository::class, new class extends OrderRepository {
-            public function __construct() {}
+        static::getContainer()->set(OrderRepository::class, new class () extends OrderRepository {
+            public function __construct()
+            {
+            }
             public function find($id, $lockMode = null, $lockVersion = null)
             {
                 return null;
@@ -51,4 +55,3 @@ class OrderControllerTest extends WebTestCase
         $this->assertSame(404, $client->getResponse()->getStatusCode());
     }
 }
-

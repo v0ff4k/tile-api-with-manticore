@@ -5,13 +5,12 @@ namespace App\Repository;
 use App\Entity\Order;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * Class OrderRepository
+ * @template TEntityClass of \App\Entity\Order
+ * @extends ServiceEntityRepository<TEntityClass>
  * @package App\Repository
  */
 class OrderRepository extends ServiceEntityRepository
@@ -25,10 +24,12 @@ class OrderRepository extends ServiceEntityRepository
     }
 
     /**
+     * Получить сгруппированные заказы по периоду
+     *
      * @param int $page
      * @param int $limit
      * @param string $groupBy
-     * @return array
+     * @return array{page: int, limit: int, total: int, pages: int, data: array<array{period: string, count: int}>}
      * @throws \Doctrine\DBAL\Exception
      */
     public function getGroupedOrders(int $page, int $limit, string $groupBy): array
@@ -50,20 +51,29 @@ class OrderRepository extends ServiceEntityRepository
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
         $stmt->bindValue('offset', $offset, \PDO::PARAM_INT);
-        $result = $stmt->executeQuery()->fetchAllAssociative();
+        $rows = $stmt->executeQuery()->fetchAllAssociative();
 
         // Получаем общее количество групп
-        $countSql = "SELECT COUNT(DISTINCT {$groupExpr}) FROM orders";
-        $total = $this->connection->executeQuery($countSql)->fetchOne();
+        $countSql    = "SELECT COUNT(DISTINCT {$groupExpr}) FROM orders";
+        $totalResult = $this->connection->executeQuery($countSql)->fetchOne();
+        $total       = (int) ($totalResult ?? 0);
 
-        $pages = (int) ceil($total / $limit);
+        $pages = (int) ceil((float) $total / (float) $limit);
+
+        /** @var array<array{period: string, count: int}> $data */
+        $data = array_map(static function (array $row): array {
+            return [
+                'period' => (string) ($row['period'] ?? ''),
+                'count' => (int) ($row['count'] ?? 0),
+            ];
+        }, $rows);
 
         return [
             'page' => $page,
             'limit' => $limit,
-            'total' => (int) $total,
+            'total' => $total,
             'pages' => $pages,
-            'data' => $result,
+            'data' => $data,
         ];
     }
 
@@ -76,16 +86,22 @@ class OrderRepository extends ServiceEntityRepository
         return match($groupBy) {
             'day' => "DATE_FORMAT(create_date, '%Y-%m-%d')",
             'month' => "DATE_FORMAT(create_date, '%Y-%m')",
-            'year' => "YEAR(create_date)",
+            'year' => 'YEAR(create_date)',
             default => "DATE_FORMAT(create_date, '%Y-%m')",
         };
     }
 
     /**
      * Найти заказ по ID (для эндпоинта №4)
+     *
+     * @param int $id
+     * @return Order|null
      */
     public function findOrderById(int $id): ?Order
     {
-        return $this->find($id);
+        /** @var Order|null $order */
+        $order = $this->find($id);
+
+        return $order;
     }
 }

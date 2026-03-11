@@ -12,7 +12,6 @@ use Exception;
  */
 class StrHelper
 {
-
     /**
      * Get string between 2 pairs of strings. for minimize MEM usage.
      *
@@ -52,7 +51,7 @@ class StrHelper
                 'http' => [
                     'method' => 'GET',
                     'timeout' => 60,
-                    'header' => "User-Agent: " . self::getRandomUserAgentString() . "\r\n",
+                    'header' => 'User-Agent: ' . self::getRandomUserAgentString() . "\r\n",
                 ],
             ]
         );

@@ -1,0 +1,16 @@
+parameters:
+    level: 6
+    paths:
+        - bin/
+        - config/
+        - public/
+        - src/
+        - tests/
+    ignoreErrors:
+        # Игнорирование generic ошибок для OrderRepository (легаси код)
+        -
+            message: '#Method App\\Controller\\OrderController::grouped\(\) has parameter \$repository with generic class App\\Repository\\OrderRepository but does not specify its types: TEntityClass#'
+            path: src/Controller/OrderController.php
+        -
+            message: '#Method App\\Controller\\OrderController::show\(\) has parameter \$repository with generic class App\\Repository\\OrderRepository but does not specify its types: TEntityClass#'
+            path: src/Controller/OrderController.php
