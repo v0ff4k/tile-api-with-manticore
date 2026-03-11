@@ -50,7 +50,7 @@ services:
       MANTICORE_URL: mysql://root:@manticore:9306
     volumes:
       - ./:/var/www/html
-      - ./docker/php/setup.sh:/var/www/html/setup.sh:cached
+      - ./docker/php/setup.sh:/var/www/html/setup.sh:ro
 #    working_dir: /var/www/html
     networks:
       - tile_api
