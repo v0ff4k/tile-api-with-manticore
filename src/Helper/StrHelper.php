@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace App\Helper;
 
 use Exception;
 
@@ -52,7 +52,7 @@ class StrHelper
                 'http' => [
                     'method' => 'GET',
                     'timeout' => 60,
-                    'header' => "User-Agent: self::getRandomUserAgentString\r\n",
+                    'header' => "User-Agent: " . self::getRandomUserAgentString() . "\r\n",
                 ],
             ]
         );

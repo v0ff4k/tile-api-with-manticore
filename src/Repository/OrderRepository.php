@@ -1,20 +1,26 @@
 <?php
 
-namespace Repository;
+namespace App\Repository;
 
+use App\Entity\Order;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * Class OrderRepository
- * @package Repository
+ * @package App\Repository
  */
-class OrderRepository extends EntityRepository
+class OrderRepository extends ServiceEntityRepository
 {
     private Connection $connection;
 
-    public function __construct(Connection $connection)
+    public function __construct(ManagerRegistry $registry, Connection $connection)
     {
+        parent::__construct($registry, Order::class);
         $this->connection = $connection;
     }
 
@@ -29,7 +35,7 @@ class OrderRepository extends EntityRepository
     {
         $offset = ($page - 1) * $limit;
 
-        $groupExpr = self::groupBy($groupBy);
+        $groupExpr = $this->getGroupByExpression($groupBy);
 
         $sql = "
             SELECT 
@@ -65,7 +71,7 @@ class OrderRepository extends EntityRepository
      * @param string $groupBy
      * @return string
      */
-    private static function groupBy(string $groupBy): string
+    private function getGroupByExpression(string $groupBy): string
     {
         return match($groupBy) {
             'day' => "DATE_FORMAT(create_date, '%Y-%m-%d')",
@@ -73,5 +79,13 @@ class OrderRepository extends EntityRepository
             'year' => "YEAR(create_date)",
             default => "DATE_FORMAT(create_date, '%Y-%m')",
         };
+    }
+
+    /**
+     * Найти заказ по ID (для эндпоинта №4)
+     */
+    public function findOrderById(int $id): ?Order
+    {
+        return $this->find($id);
     }
 }

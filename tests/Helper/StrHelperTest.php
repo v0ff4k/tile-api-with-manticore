@@ -2,7 +2,7 @@
 
 namespace App\Tests\Helper;
 
-use Helper\StrHelper;
+use App\Helper\StrHelper;
 use \PHPUnit\Framework\TestCase;
 
 /**
@@ -11,20 +11,20 @@ use \PHPUnit\Framework\TestCase;
  */
 class StrHelperTest extends TestCase
 {
-    public function getStringBetweenDataProvider()
+    public static function getStringBetweenDataProvider(): array
     {
 
         // in: [ [ $expected, $string, $from, $to], ... ]
         return [
             ['проверка между тегами', '<div>проверка между тегами</div>', '<div>', '</div>'],
-            ['пров', 'тоже:1>пров</ерка', ':0>', '</'],
+            ['', 'тоже:1>пров</ерка', ':0>', '</'],
             ['провер3', 'какая-то провер3 3', '-то ', ' 3'],
-            ['юникод', 'ᰄюникода', 'ᰄ', 'да'],
+            ['юнико', 'ᰄюникода', 'ᰄ', 'да'],
 
             // wired examples
             ['', '', ' ', ''],
             ['', ' ', '', ' '],
-            ['1', '0204060', '0', '0'],
+            ['2', '0204060', '0', '0'],
             ['', '0204060', '2', '0'],//without space between start-end
             ['1020', '0102040', '0', '4'],
             //multibyte

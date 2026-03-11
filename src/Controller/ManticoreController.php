@@ -1,13 +1,11 @@
 <?php
 
-namespace Controller;
+namespace App\Controller;
 
-use Repository\OrderRepository;
-use Service\ManticoreSearchService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\ManticoreSearchService;
 
 
 /**
@@ -25,10 +23,10 @@ class ManticoreController extends BaseController
      * @param ManticoreSearchService $search
      * @return JsonResponse
      */
-    #[Route('/api/search', name: 'api_search')]
+    #[Route('/api/search', name: 'api_search', methods: ['GET'])]
     public function search(Request $request, ManticoreSearchService $search): JsonResponse
     {
-        $query = $request->query->get('q');
+        $query = (string) $request->query->get('q', '');
         $page = $request->query->getInt('page', 1);
         $limit = $request->query->getInt('limit', 10);
 

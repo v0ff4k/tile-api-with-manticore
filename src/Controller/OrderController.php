@@ -1,8 +1,8 @@
 <?php
 
-namespace Controller;
+namespace App\Controller;
 
-use Repository\OrderRepository;
+use App\Repository\OrderRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,7 +28,7 @@ class OrderController extends BaseController
         $groupBy = $request->query->get('group_by', 'month');
         $allowed = ['day', 'month', 'year'];
 
-        if (!in_array($groupBy, $allowed)) {
+        if (!in_array($groupBy, $allowed, true)) {
             $groupBy = 'month';
         }
 

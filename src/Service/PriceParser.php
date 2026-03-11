@@ -1,8 +1,15 @@
 <?php
 
-namespace Service;
+namespace App\Service;
 
 use RuntimeException;
+use App\Helper\StrHelper;
+use App\Helper\TileExpertHelper;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 /**
  * Class PriceParser
@@ -11,9 +18,11 @@ use RuntimeException;
 class PriceParser
 {
     private string $dataDir;
+    private HttpClientInterface $http;
 
-    public function __construct(string $dataDir = 'https://tile.expert/it/tile')
+    public function __construct(HttpClientInterface $http, string $dataDir = 'https://tile.expert/it/tile')
     {
+        $this->http = $http;
         $this->dataDir = $dataDir;
     }
 
@@ -26,19 +35,26 @@ class PriceParser
      */
     public function parse(string $factory, string $collection, string $article): float
     {
-        $filepath = sprintf('%s/%s/%s/a/%s', $this->dataDir, $factory, $collection, $article);
+        $url = sprintf('%s/%s/%s/a/%s', $this->dataDir, $factory, $collection, $article);
 
-        $html = \Helper\StrHelper::getUrlAsString($filepath);
-        if ($html === false) {
-            throw new RuntimeException('Failed to read HTML file');
+        try {
+            $response = $this->http->request('GET', $url, [
+                'headers' => [
+                    'User-Agent' => StrHelper::getRandomUserAgentString(),
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                ],
+                'timeout' => 15,
+                'max_redirects' => 5,
+            ]);
+            if ($response->getStatusCode() !== 200) {
+                throw new RuntimeException('Failed to fetch page');
+            }
+            $html = $response->getContent();
+        } catch (TransportExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
+            throw new RuntimeException('Failed to fetch page');
         }
 
-        // Извлечение JSON из тега  @todo  getStringBetween() is faster an mem consuming - less !
-        if (!preg_match('/<script type="application\/json" data-js-react-on-rails-store="appStore">(.*?)<\/script>/s', $html, $matches)) {
-            throw new RuntimeException('JSON data not found');
-        }
-
-        $data = json_decode($matches[1], true);
+        $data = TileExpertHelper::extractAppStoreJson($html);
         if (!isset($data['slider']['elements'])) {
             throw new RuntimeException('Invalid JSON structure');
         }

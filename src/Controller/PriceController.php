@@ -1,8 +1,8 @@
 <?php
 // src/Controller/PriceController.php
-namespace Controller;
+namespace App\Controller;
 
-use Service\PriceParser;
+use App\Service\PriceParser;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,32 +13,33 @@ use OpenApi\Attributes as OA;
  * Class PriceController
  * @package App\Controller
  */
-#[OA\Get(
-path: "/api/price",
-    summary: "Получить цену товара по фабрике, коллекции и артикулу",
-    tags: ["Price"],
-    parameters: [
-    new OA\Parameter(name: "factory", in: "query", required: true, schema: new OA\Schema(type: "string")),
-        new OA\Parameter(name: "collection", in: "query", required: true, schema: new OA\Schema(type: "string")),
-        new OA\Parameter(name: "article", in: "query", required: true, schema: new OA\Schema(type: "string")),
-    ],
-    responses: [
-    new OA\Response(response: 200, description: "Успешно", content: new OA\JsonContent(properties: [
-    new OA\Property(property: "price", type: "number"),
-            new OA\Property(property: "factory", type: "string"),
-            new OA\Property(property: "collection", type: "string"),
-            new OA\Property(property: "article", type: "string"),
-        ])),
-        new OA\Response(response: 400, description: "Отсутствуют параметры"),
-        new OA\Response(response: 404, description: "Файл не найден или цена не извлечена")
-    ]
-)]
 class PriceController extends BaseController
 {
     /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param \Service\PriceParser $parser
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @OA\Get(
+     *     path: "/api/price",
+     *     summary: "Получить цену товара по фабрике, коллекции и артикулу",
+     *     tags: ["Price"],
+     *     parameters: [
+     *          @OA\Parameter(name: "factory", in: "query", required: true, schema: new OA\Schema(type: "string")),
+     *          @OA\Parameter(name: "collection", in: "query", required: true, schema: new OA\Schema(type: "string")),
+     *          @OA\Parameter(name: "article", in: "query", required: true, schema: new OA\Schema(type: "string")),
+     *     ],
+     *      responses: [
+     *              @OA\Response(response: 200, description: "Успешно", content: new OA\JsonContent(properties: [
+     *              @OA\Property(property: "price", type: "number"),
+     *              @OA\Property(property: "factory", type: "string"),
+     *              @OA\Property(property: "collection", type: "string"),
+     *              @OA\Property(property: "article", type: "string"),
+     *          ])),
+     *          @OA\Response(response: 400, description: "Отсутствуют параметры"),
+     *          @OA\Response(response: 404, description: "Файл не найден или цена не извлечена")
+     *     ]
+     * )
+     *
+     * @param Request $request
+     * @param PriceParser $parser
+     * @return JsonResponse
      */
     #[Route('/api/price', name: 'api_price', methods: ['GET'])]
     public function getPrice(Request $request, PriceParser $parser): JsonResponse
